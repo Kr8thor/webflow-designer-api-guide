@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
+import { useNotification } from '../../shared/context/NotificationContext'
+import { useClipboard } from '../../shared/hooks/useClipboard'
 
 interface Element {
   id: string
@@ -36,55 +38,143 @@ export default function App() {
   const [element, setElement] = useState<Element>(DEFAULT_ELEMENT)
   const [selectedStyleKey, setSelectedStyleKey] = useState<string | null>(null)
   const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const updateStyle = (key: string, value: string) => {
-    const updated = {
-      ...element,
-      styles: { ...element.styles, [key]: value }
+  const { showSuccess, showError, showInfo } = useNotification()
+  const { copied, copy } = useClipboard()
+
+  /**
+   * Validate style input
+   */
+  const validateStyleInput = (key: string, value: string): { isValid: boolean; message: string } => {
+    if (!key.trim()) {
+      return { isValid: false, message: 'Style key cannot be empty' }
     }
-    setElement(updated)
-    setMessage(`✅ Updated ${key}`)
-  }
-
-  const updateAttribute = (key: string, value: string) => {
-    const updated = {
-      ...element,
-      attributes: { ...element.attributes, [key]: value }
+    if (!value.trim()) {
+      return { isValid: false, message: 'Style value cannot be empty' }
     }
-    setElement(updated)
-    setMessage(`✅ Updated ${key}`)
-  }
-
-  const updateName = (newName: string) => {
-    setElement({ ...element, name: newName })
-  }
-
-  const deleteStyle = (key: string) => {
-    const updated = {
-      ...element,
-      styles: { ...element.styles }
+    if (key.length > 50) {
+      return { isValid: false, message: 'Style key must be 50 characters or less' }
     }
-    delete updated.styles[key]
-    setElement(updated)
-    setSelectedStyleKey(null)
-    setMessage(`✅ Deleted ${key}`)
+    return { isValid: true, message: '' }
   }
 
-  const addStyle = (key: string, value: string) => {
+  /**
+   * Validate attribute input
+   */
+  const validateAttributeInput = (key: string, value: string): { isValid: boolean; message: string } => {
+    if (!key.trim()) {
+      return { isValid: false, message: 'Attribute key cannot be empty' }
+    }
+    if (!value.trim() && key !== 'text') {
+      return { isValid: false, message: 'Attribute value cannot be empty' }
+    }
+    return { isValid: true, message: '' }
+  }
+
+  const updateStyle = useCallback((key: string, value: string) => {
+    try {
+      const validation = validateStyleInput(key, value)
+      if (!validation.isValid) {
+        setError(validation.message)
+        showError(validation.message)
+        return
+      }
+
+      const updated = {
+        ...element,
+        styles: { ...element.styles, [key]: value }
+      }
+      setElement(updated)
+      setError(null)
+      showSuccess(`Updated ${key}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update style'
+      setError(errorMessage)
+      showError(errorMessage)
+    }
+  }, [element, showSuccess, showError])
+
+  const updateAttribute = useCallback((key: string, value: string) => {
+    try {
+      const validation = validateAttributeInput(key, value)
+      if (!validation.isValid) {
+        setError(validation.message)
+        showError(validation.message)
+        return
+      }
+
+      const updated = {
+        ...element,
+        attributes: { ...element.attributes, [key]: value }
+      }
+      setElement(updated)
+      setError(null)
+      showSuccess(`Updated ${key}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update attribute'
+      setError(errorMessage)
+      showError(errorMessage)
+    }
+  }, [element, showSuccess, showError])
+
+  const updateName = useCallback((newName: string) => {
+    try {
+      if (!newName.trim()) {
+        setError('Element name cannot be empty')
+        showError('Element name cannot be empty')
+        return
+      }
+      setElement({ ...element, name: newName })
+      setError(null)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update name'
+      setError(errorMessage)
+      showError(errorMessage)
+    }
+  }, [element, showSuccess, showError])
+
+  const deleteStyle = useCallback((key: string) => {
+    try {
+      const updated = {
+        ...element,
+        styles: { ...element.styles }
+      }
+      delete updated.styles[key]
+      setElement(updated)
+      setSelectedStyleKey(null)
+      setError(null)
+      showSuccess(`Deleted ${key}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete style'
+      setError(errorMessage)
+      showError(errorMessage)
+    }
+  }, [element, showSuccess, showError])
+
+  const addStyle = useCallback((key: string, value: string) => {
     if (key && value) {
       updateStyle(key, value)
     }
-  }
+  }, [updateStyle])
 
-  const copyCSS = () => {
-    const css = Object.entries(element.styles)
-      .map(([k, v]) => `  ${k}: ${v};`)
-      .join('\n')
+  const copyCSS = useCallback(async () => {
+    try {
+      const css = Object.entries(element.styles)
+        .map(([k, v]) => `  ${k}: ${v};`)
+        .join('\n')
 
-    const text = `${element.name} {\n${css}\n}`
-    navigator.clipboard.writeText(text)
-    setMessage('✅ CSS copied to clipboard')
-  }
+      const text = `${element.name} {\n${css}\n}`
+      await copy(text)
+      setError(null)
+      showSuccess('CSS copied to clipboard')
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to copy CSS'
+      setError(errorMessage)
+      showError(errorMessage)
+    }
+  }, [element, copy, showSuccess, showError])
 
   const getStyleCategory = (key: string): string => {
     if (['background-color', 'color', 'border-color'].includes(key)) return 'Colors'
@@ -105,8 +195,39 @@ export default function App() {
     <div className="app">
       <header className="header">
         <h1>✏️ Element Editor</h1>
-        <p>Edit element properties and styles</p>
+        <p>Edit element properties and styles with Phase 1 Enhancements</p>
       </header>
+
+      {error && (
+        <div
+          className="error-card"
+          style={{
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            color: '#c33',
+            padding: '12px',
+            margin: '10px',
+            borderRadius: '4px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span><strong>Error:</strong> {error}</span>
+          <button
+            onClick={() => setError(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              fontSize: '18px',
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
 
       {message && <div className="message">{message}<button className="close-btn" onClick={() => setMessage('')}>×</button></div>}
 
@@ -139,7 +260,9 @@ export default function App() {
             </div>
           </div>
 
-          <button className="btn btn-secondary" onClick={copyCSS}>📋 Copy CSS</button>
+          <button className="btn btn-secondary" onClick={copyCSS}>
+            {copied ? '✓ Copied!' : '📋 Copy CSS'}
+          </button>
         </aside>
 
         <main className="main">
