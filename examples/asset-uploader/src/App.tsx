@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { useNotification } from '../../shared/context/NotificationContext'
 
 interface Asset {
   id: string
@@ -21,6 +22,13 @@ interface Folder {
 
 type SortBy = 'name' | 'size' | 'date'
 
+const MAX_FILE_SIZE = 100 * 1024 * 1024 // 100MB
+const ALLOWED_TYPES = {
+  image: ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'],
+  video: ['mp4', 'webm', 'mov', 'avi', 'mkv'],
+  document: ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'txt']
+}
+
 export default function App() {
   const [assets, setAssets] = useState<Asset[]>([])
   const [folders, setFolders] = useState<Folder[]>([])
@@ -30,7 +38,12 @@ export default function App() {
   const [sortBy, setSortBy] = useState<SortBy>('date')
   const [message, setMessage] = useState('')
   const [showUpload, setShowUpload] = useState(false)
+  const [dragActive, setDragActive] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const { showSuccess, showError, showInfo } = useNotification()
 
   useEffect(() => {
     loadDefaultAssets()
@@ -90,46 +103,139 @@ export default function App() {
     setAssets(defaultAssets)
   }
 
-  const handleFileUpload = (files: FileList) => {
-    if (!files) return
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i]
-      const type = getAssetType(file.name)
-
-      const newAsset: Asset = {
-        id: Date.now().toString() + i,
-        name: file.name,
-        type,
-        size: file.size,
-        folderId: currentFolderId,
-        uploadedAt: new Date(),
-        tags: []
-      }
-
-      setAssets([...assets, newAsset])
-      setMessage(`✅ Uploaded: ${file.name}`)
+  /**
+   * Validate file before upload
+   */
+  const validateFile = (file: File): { isValid: boolean; message: string } => {
+    if (file.size > MAX_FILE_SIZE) {
+      return { isValid: false, message: `File too large: ${file.name} (max 100MB)` }
     }
+
+    const ext = file.name.split('.').pop()?.toLowerCase() || ''
+    const validExts = [...ALLOWED_TYPES.image, ...ALLOWED_TYPES.video, ...ALLOWED_TYPES.document]
+
+    if (!validExts.includes(ext)) {
+      return { isValid: false, message: `File type not allowed: ${ext}` }
+    }
+
+    return { isValid: true, message: '' }
   }
 
+  /**
+   * Get asset type from filename
+   */
   const getAssetType = (filename: string): 'image' | 'video' | 'document' => {
     const ext = filename.split('.').pop()?.toLowerCase() || ''
-    if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) return 'image'
-    if (['mp4', 'webm', 'mov'].includes(ext)) return 'video'
+    if (ALLOWED_TYPES.image.includes(ext)) return 'image'
+    if (ALLOWED_TYPES.video.includes(ext)) return 'video'
     return 'document'
   }
 
-  const createFolder = (name: string) => {
-    const newFolder: Folder = {
-      id: Date.now().toString(),
-      name,
-      parentId: currentFolderId,
-      createdAt: new Date(),
-      assetCount: 0
+  /**
+   * Handle file upload with validation
+   */
+  const handleFileUpload = useCallback((files: FileList | null) => {
+    if (!files) return
+
+    setLoading(true)
+    setError(null)
+
+    const validFiles: File[] = []
+    const errors: string[] = []
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
+      const validation = validateFile(file)
+
+      if (!validation.isValid) {
+        errors.push(validation.message)
+      } else {
+        validFiles.push(file)
+      }
     }
-    setFolders([...folders, newFolder])
-    setMessage(`✅ Created folder: ${name}`)
-  }
+
+    // Upload valid files
+    if (validFiles.length > 0) {
+      try {
+        const newAssets = validFiles.map((file, i) => ({
+          id: Date.now().toString() + i,
+          name: file.name,
+          type: getAssetType(file.name),
+          size: file.size,
+          folderId: currentFolderId,
+          uploadedAt: new Date(),
+          tags: []
+        }))
+
+        setAssets([...assets, ...newAssets])
+        showSuccess(`Uploaded ${validFiles.length} file(s)`)
+
+        if (validFiles.length === 1) {
+          setMessage(`✅ Uploaded: ${validFiles[0].name}`)
+        } else {
+          setMessage(`✅ Uploaded ${validFiles.length} files`)
+        }
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'Upload failed'
+        setError(errorMessage)
+        showError(errorMessage)
+      }
+    }
+
+    // Show validation errors
+    if (errors.length > 0) {
+      errors.forEach(err => showError(err))
+      if (errors.length === 1 && validFiles.length === 0) {
+        setError(errors[0])
+      }
+    }
+
+    setLoading(false)
+  }, [assets, currentFolderId, showSuccess, showError])
+
+  /**
+   * Create new folder
+   */
+  const createFolder = useCallback((name: string) => {
+    try {
+      if (!name.trim()) {
+        showError('Folder name cannot be empty')
+        return
+      }
+
+      const newFolder: Folder = {
+        id: Date.now().toString(),
+        name,
+        parentId: currentFolderId,
+        createdAt: new Date(),
+        assetCount: 0
+      }
+      setFolders([...folders, newFolder])
+      setMessage(`✅ Created folder: ${name}`)
+      showSuccess(`Created folder: ${name}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create folder'
+      showError(errorMessage)
+    }
+  }, [folders, currentFolderId, showSuccess, showError])
+
+  /**
+   * Rename folder
+   */
+  const renameFolder = useCallback((id: string, newName: string) => {
+    try {
+      if (!newName.trim()) {
+        showError('Folder name cannot be empty')
+        return
+      }
+
+      setFolders(folders.map(f => f.id === id ? { ...f, name: newName } : f))
+      showSuccess(`Renamed folder to: ${newName}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to rename folder'
+      showError(errorMessage)
+    }
+  }, [folders, showSuccess, showError])
 
   const deleteAsset = (id: string) => {
     const asset = assets.find(a => a.id === id)
@@ -205,6 +311,37 @@ export default function App() {
         </div>
       </header>
 
+      {error && (
+        <div
+          className="error-card"
+          style={{
+            backgroundColor: '#fee',
+            border: '1px solid #fcc',
+            color: '#c33',
+            padding: '12px 16px',
+            margin: '10px',
+            borderRadius: '4px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <span><strong>Error:</strong> {error}</span>
+          <button
+            onClick={() => setError(null)}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'inherit',
+              cursor: 'pointer',
+              fontSize: '18px',
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {message && (
         <div className="message">
           {message}
@@ -260,27 +397,52 @@ export default function App() {
           {showUpload && (
             <div className="upload-zone">
               <div
-                className="upload-area"
+                className={`upload-area ${dragActive ? 'drag-active' : ''}`}
+                style={dragActive ? {
+                  backgroundColor: '#e3f2fd',
+                  borderColor: '#0066cc',
+                  transform: 'scale(1.02)',
+                } : {}}
                 onDrop={(e) => {
                   e.preventDefault()
+                  e.stopPropagation()
+                  setDragActive(false)
                   handleFileUpload(e.dataTransfer.files)
                   setShowUpload(false)
                 }}
-                onDragOver={(e) => e.preventDefault()}
+                onDragOver={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setDragActive(true)
+                }}
+                onDragEnter={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setDragActive(true)
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault()
+                  e.stopPropagation()
+                  setDragActive(false)
+                }}
               >
-                <div className="upload-icon">📤</div>
-                <h3>Drop files here or</h3>
+                <div className="upload-icon" style={{ fontSize: dragActive ? '48px' : '32px', transition: 'all 0.2s' }}>
+                  {dragActive ? '⬇️' : '📤'}
+                </div>
+                <h3>{dragActive ? 'Release to upload files' : 'Drop files here or'}</h3>
                 <button
                   className="btn btn-primary"
                   onClick={() => fileInputRef.current?.click()}
+                  disabled={loading}
                 >
-                  Browse Files
+                  {loading ? '⏳ Uploading...' : 'Browse Files'}
                 </button>
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
                   style={{ display: 'none' }}
+                  disabled={loading}
                   onChange={(e) => {
                     if (e.target.files) {
                       handleFileUpload(e.target.files)
@@ -288,6 +450,9 @@ export default function App() {
                     }
                   }}
                 />
+                <p style={{ marginTop: '12px', fontSize: '12px', color: '#666' }}>
+                  Max 100MB per file. Allowed: Images, Videos, Documents
+                </p>
               </div>
             </div>
           )}

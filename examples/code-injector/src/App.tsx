@@ -1,4 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
+import { useNotification } from '../../shared/context/NotificationContext'
+import { useClipboard } from '../../shared/hooks/useClipboard'
 
 interface Injection {
   id: string

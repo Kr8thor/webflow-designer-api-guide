@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
+import { useNotification } from '../../shared/context/NotificationContext'
 
 interface Component {
   id: string
@@ -47,6 +48,8 @@ export default function App() {
   const [selectedCategory, setSelectedCategory] = useState('all')
   const [message, setMessage] = useState('')
 
+  const { showSuccess, showError, showInfo } = useNotification()
+
   const categories = ['all', ...new Set(components.map(c => c.category))]
 
   const filteredComponents = components.filter(c => {
@@ -56,43 +59,79 @@ export default function App() {
     return matchesSearch && matchesCategory
   })
 
-  const createComponent = (name: string, description: string, category: string, tags: string[]) => {
-    const newComponent: Component = {
-      id: Date.now().toString(),
-      name,
-      description,
-      category,
-      tags,
-      instances: 0,
-      createdAt: new Date()
+  const createComponent = useCallback((name: string, description: string, category: string, tags: string[]) => {
+    try {
+      if (!name.trim()) {
+        showError('Component name cannot be empty')
+        return
+      }
+
+      const newComponent: Component = {
+        id: Date.now().toString(),
+        name,
+        description,
+        category,
+        tags,
+        instances: 0,
+        createdAt: new Date()
+      }
+      setComponents([...components, newComponent])
+      setSelectedComponent(newComponent)
+      setMessage(`✅ Created component: ${name}`)
+      showSuccess(`Created component: ${name}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create component'
+      showError(errorMessage)
     }
-    setComponents([...components, newComponent])
-    setSelectedComponent(newComponent)
-    setMessage(`✅ Created component: ${name}`)
-  }
+  }, [components, showSuccess, showError])
 
-  const cloneComponent = (id: string, newName: string) => {
-    const original = components.find(c => c.id === id)
-    if (!original) return
+  const cloneComponent = useCallback((id: string, newName: string) => {
+    try {
+      if (!newName.trim()) {
+        showError('Component name cannot be empty')
+        return
+      }
 
-    const cloned: Component = {
-      ...original,
-      id: Date.now().toString(),
-      name: newName,
-      instances: 0,
-      createdAt: new Date()
+      const original = components.find(c => c.id === id)
+      if (!original) {
+        showError('Component not found')
+        return
+      }
+
+      const cloned: Component = {
+        ...original,
+        id: Date.now().toString(),
+        name: newName,
+        instances: 0,
+        createdAt: new Date()
+      }
+      setComponents([...components, cloned])
+      setSelectedComponent(cloned)
+      setMessage(`✅ Cloned: ${newName}`)
+      showSuccess(`Cloned component: ${newName}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to clone component'
+      showError(errorMessage)
     }
-    setComponents([...components, cloned])
-    setSelectedComponent(cloned)
-    setMessage(`✅ Cloned: ${newName}`)
-  }
+  }, [components, showSuccess, showError])
 
-  const deleteComponent = (id: string) => {
-    const comp = components.find(c => c.id === id)
-    setComponents(components.filter(c => c.id !== id))
-    setSelectedComponent(null)
-    setMessage(`✅ Deleted: ${comp?.name}`)
-  }
+  const deleteComponent = useCallback((id: string) => {
+    try {
+      const comp = components.find(c => c.id === id)
+      if (!comp) {
+        showError('Component not found')
+        return
+      }
+
+      setComponents(components.filter(c => c.id !== id))
+      setSelectedComponent(null)
+      setMessage(`✅ Deleted: ${comp.name}`)
+      showSuccess(`Deleted component: ${comp.name}`)
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete component'
+      showError(errorMessage)
+    }
+  }, [components, showSuccess, showError])
 
   const updateInstances = (id: string, count: number) => {
     const updated = components.map(c => c.id === id ? { ...c, instances: count } : c)
