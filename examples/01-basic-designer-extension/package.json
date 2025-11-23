@@ -1,0 +1,28 @@
+{
+  "name": "basic-designer-extension",
+  "version": "1.0.0",
+  "description": "Basic Designer Extension - Foundational example demonstrating core Designer API functionality",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "verify": "tsc --noEmit"
+  },
+  "keywords": [
+    "webflow",
+    "designer-api",
+    "extension",
+    "example"
+  ],
+  "author": "Webflow Developer",
+  "license": "MIT",
+  "dependencies": {
+    "@webflow/designer-api": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

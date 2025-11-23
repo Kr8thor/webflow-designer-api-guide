@@ -1,0 +1,25 @@
+{
+  "name": "Element Properties Editor",
+  "version": "1.0.0",
+  "description": "Advanced element properties, attributes, and styles editor with undo/redo",
+  "author": "Webflow Developer",
+  "permissions": [
+    "element:read",
+    "element:write",
+    "component:read",
+    "page:read",
+    "event:listen"
+  ],
+  "ui": {
+    "position": "right",
+    "width": 450
+  },
+  "features": {
+    "propertyEditing": true,
+    "attributeManagement": true,
+    "styleApplication": true,
+    "classManagement": true,
+    "historyAndUndo": true,
+    "batchOperations": true
+  }
+}

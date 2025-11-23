@@ -1,0 +1,22 @@
+{
+  "name": "Basic Designer Extension",
+  "version": "1.0.0",
+  "description": "Foundational example demonstrating core Designer API functionality",
+  "author": "Webflow Developer",
+  "permissions": [
+    "element:read",
+    "element:write",
+    "component:read",
+    "page:read",
+    "event:listen"
+  ],
+  "ui": {
+    "position": "right",
+    "width": 400
+  },
+  "features": {
+    "elementInspection": true,
+    "eventMonitoring": true,
+    "styleEditing": true
+  }
+}
