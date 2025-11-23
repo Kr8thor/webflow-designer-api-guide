@@ -1,0 +1,16 @@
+{
+  "name": "webflow-designer-toolkit",
+  "version": "1.0.0",
+  "description": "Complete Webflow Designer toolkit extension",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsc --watch",
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

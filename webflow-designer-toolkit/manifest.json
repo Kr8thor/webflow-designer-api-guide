@@ -1,0 +1,31 @@
+{
+  "name": "Webflow Designer Toolkit",
+  "version": "1.0.0",
+  "description": "Complete toolkit for Webflow Designer - Manage components, tokens, assets, pages, and more with an integrated interface",
+  "author": "Webflow Developer",
+  "permissions": [
+    "element:read",
+    "element:write",
+    "component:read",
+    "component:write",
+    "page:read",
+    "page:write",
+    "variable:read",
+    "variable:write",
+    "asset:read",
+    "asset:write",
+    "event:listen"
+  ],
+  "ui": {
+    "position": "right",
+    "width": 500
+  },
+  "keywords": [
+    "components",
+    "tokens",
+    "assets",
+    "pages",
+    "design-system",
+    "productivity"
+  ]
+}
