@@ -1,0 +1,1 @@
+{"name":"asset-organizer","version":"1.0.0","description":"Asset management and organization extension","main":"dist/index.js","scripts":{"dev":"tsc --watch","build":"tsc","clean":"rm -rf dist"},"dependencies":{"@webflow/designer-api":"^1.0.0"},"devDependencies":{"typescript":"^5.0.0","@types/node":"^20.0.0"}}

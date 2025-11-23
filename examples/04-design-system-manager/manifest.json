@@ -1,0 +1,7 @@
+{
+  "name": "Design System Manager",
+  "version": "1.0.0",
+  "description": "Token and design system management",
+  "permissions": ["variable:read", "variable:write", "element:read", "element:write"],
+  "ui": {"position": "right", "width": 400}
+}

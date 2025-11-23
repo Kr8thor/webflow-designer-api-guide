@@ -1,0 +1,16 @@
+{
+  "name": "Component Library Manager",
+  "version": "1.0.0",
+  "description": "Advanced component library management with inventory, variants, and sync",
+  "permissions": [
+    "component:read",
+    "component:write",
+    "element:read",
+    "page:read",
+    "event:listen"
+  ],
+  "ui": {
+    "position": "right",
+    "width": 400
+  }
+}

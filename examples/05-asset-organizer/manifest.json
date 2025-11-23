@@ -1,0 +1,1 @@
+{"name":"Asset Organizer","version":"1.0.0","description":"Asset management and organization extension","permissions":["asset:read","asset:write","element:read"],"ui":{"position":"right","width":400}}
