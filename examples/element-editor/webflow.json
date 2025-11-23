@@ -1,0 +1,9 @@
+{
+  "name": "Element Editor",
+  "description": "Edit element properties and styles in real-time",
+  "version": "1.0.0",
+  "designExtension": {
+    "allowedScopes": ["designer:read", "designer:write"],
+    "requiredScopes": ["designer:write"]
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Event-Driven App",
+  "description": "Real-time event monitoring and handling with Webflow Designer API",
+  "version": "1.0.0",
+  "designExtension": {
+    "allowedScopes": ["designer:read", "designer:write"],
+    "requiredScopes": ["designer:read"]
+  }
+}

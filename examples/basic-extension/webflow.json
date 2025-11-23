@@ -1,0 +1,9 @@
+{
+  "name": "Basic Extension",
+  "version": "1.0.0",
+  "description": "A minimal starter Designer Extension example",
+  "designExtension": {
+    "entrypoint": "src/index.tsx",
+    "allowedScopes": ["designer:read", "designer:write"]
+  }
+}

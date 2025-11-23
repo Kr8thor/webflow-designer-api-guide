@@ -1,0 +1,14 @@
+{
+  "name": "Design Tokens Manager",
+  "description": "Create and manage design tokens (colors, sizes, typography) in your Webflow site",
+  "version": "1.0.0",
+  "designExtension": {
+    "allowedScopes": [
+      "designer:read",
+      "designer:write"
+    ],
+    "requiredScopes": [
+      "designer:write"
+    ]
+  }
+}

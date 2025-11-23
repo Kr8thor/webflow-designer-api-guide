@@ -1,0 +1,95 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body, #root { height: 100%; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #333; }
+
+.app { display: flex; flex-direction: column; height: 100vh; background-color: #f5f7fa; }
+
+.header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.header h1 { font-size: 28px; margin-bottom: 8px; }
+.header p { font-size: 14px; opacity: 0.9; }
+
+.message { display: flex; align-items: center; justify-content: space-between; background-color: #d4edda; color: #155724; padding: 12px 16px; border-left: 4px solid #28a745; }
+.close-btn { background: none; border: none; font-size: 20px; cursor: pointer; color: inherit; opacity: 0.7; }
+.close-btn:hover { opacity: 1; }
+
+.container { display: flex; flex: 1; overflow: hidden; }
+
+.sidebar { width: 250px; background: white; border-right: 1px solid #e0e6ed; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+.pages-list h3 { font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+.page-btn { width: 100%; padding: 12px 10px; background-color: #f5f7fa; border: 1px solid #e0e6ed; border-radius: 6px; cursor: pointer; transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; font-size: 13px; margin-bottom: 6px; }
+.page-btn:hover { background-color: #eef2f7; border-color: #667eea; }
+.page-btn.active { background-color: #667eea; color: white; border-color: #667eea; }
+.page-name { flex: 1; text-align: left; }
+.score { font-weight: 600; font-size: 11px; }
+.score-good { color: #28a745; }
+.score-ok { color: #ffc107; }
+.score-poor { color: #dc3545; }
+
+.tools, .templates { padding-top: 20px; border-top: 1px solid #e0e6ed; }
+.templates { display: flex; flex-direction: column; gap: 8px; }
+.templates button { width: 100%; padding: 8px 12px; background-color: #f5f7fa; border: 1px solid #e0e6ed; border-radius: 4px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+.templates button:hover { background-color: #667eea; color: white; border-color: #667eea; }
+
+.btn { padding: 10px 16px; border: none; border-radius: 6px; font-size: 14px; cursor: pointer; transition: all 0.2s; }
+.btn-secondary { background-color: #f5f7fa; border: 1px solid #e0e6ed; color: #333; width: 100%; }
+.btn-secondary:hover { background-color: #667eea; color: white; border-color: #667eea; }
+
+.main { flex: 1; overflow-y: auto; padding: 30px; }
+.empty-state { text-align: center; padding: 60px 20px; color: #999; }
+
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+.page-header h2 { font-size: 24px; }
+
+.score-badge { display: flex; align-items: center; gap: 12px; padding: 12px 16px; background: white; border-radius: 8px; border: 1px solid #e0e6ed; }
+.score-circle { width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-weight: 700; font-size: 18px; }
+.score-badge.score-good .score-circle { background-color: #d4edda; color: #28a745; }
+.score-badge.score-ok .score-circle { background-color: #fff3cd; color: #ffc107; }
+.score-badge.score-poor .score-circle { background-color: #f8d7da; color: #dc3545; }
+.score-label { font-size: 12px; text-transform: uppercase; color: #999; }
+
+.issues { background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.issues h3 { font-size: 16px; margin-bottom: 12px; }
+.issues-list { display: flex; flex-direction: column; gap: 10px; }
+.issue { padding: 12px; border-radius: 6px; border-left: 4px solid; display: flex; gap: 12px; }
+.issue-error { background-color: #f8d7da; border-left-color: #dc3545; }
+.issue-warning { background-color: #fff3cd; border-left-color: #ffc107; }
+.issue-info { background-color: #d1ecf1; border-left-color: #17a2b8; }
+.issue-label { font-size: 11px; font-weight: 600; padding: 2px 6px; background-color: rgba(0,0,0,0.1); border-radius: 3px; white-space: nowrap; }
+.issue strong { display: block; margin-bottom: 4px; }
+.issue p { font-size: 13px; margin: 0; }
+
+.success-message { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 16px; border-radius: 8px; margin-bottom: 20px; }
+
+.form-section { background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 20px; margin-bottom: 20px; }
+.form-section h3 { font-size: 16px; margin-bottom: 16px; }
+
+.form-group { margin-bottom: 16px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.form-group input, .form-group textarea { width: 100%; padding: 10px 12px; border: 1px solid #e0e6ed; border-radius: 6px; font-size: 14px; font-family: inherit; }
+.form-group input:focus, .form-group textarea:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102,126,234,0.1); }
+.form-group textarea { resize: vertical; }
+
+.char-count { font-size: 12px; color: #999; margin-top: 4px; }
+.hint { font-size: 12px; color: #999; margin-top: 6px; }
+
+.suggest-btn { margin-top: 8px; padding: 6px 12px; background-color: #667eea; color: white; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.suggest-btn:hover { background-color: #5568d3; }
+
+.preview-section { background: white; border: 1px solid #e0e6ed; border-radius: 8px; padding: 20px; }
+.preview-section h3 { font-size: 16px; margin-bottom: 16px; }
+
+.search-preview { background: #f5f7fa; padding: 16px; border-radius: 6px; }
+.preview-url { font-size: 12px; color: #006621; margin-bottom: 4px; }
+.preview-title { font-size: 18px; color: #1a0dff; margin-bottom: 4px; text-decoration: underline; cursor: pointer; }
+.preview-desc { font-size: 13px; color: #545454; line-height: 1.4; }
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #ddd; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #999; }
+
+@media (max-width: 768px) {
+  .container { flex-direction: column; }
+  .sidebar { width: 100%; border-right: none; border-bottom: 1px solid #e0e6ed; }
+  .page-header { flex-direction: column; gap: 16px; align-items: flex-start; }
+}

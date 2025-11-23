@@ -1,0 +1,9 @@
+{
+  "name": "Component Library",
+  "description": "Create, manage, and organize reusable components",
+  "version": "1.0.0",
+  "designExtension": {
+    "allowedScopes": ["designer:read", "designer:write"],
+    "requiredScopes": ["designer:write"]
+  }
+}

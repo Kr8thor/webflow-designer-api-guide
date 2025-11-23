@@ -1,0 +1,9 @@
+{
+  "name": "Code Injector",
+  "description": "Inject custom HTML, CSS, and JavaScript into your Webflow site",
+  "version": "1.0.0",
+  "designExtension": {
+    "allowedScopes": ["designer:read", "designer:write"],
+    "requiredScopes": ["designer:write"]
+  }
+}

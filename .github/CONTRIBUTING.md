@@ -237,19 +237,37 @@ export function helperFunction() {}
 ```
 examples/project-name/
 ├── README.md
-├── src/
-│   ├── index.ts
-│   ├── api/
-│   ├── components/
-│   ├── types/
-│   └── utils/
-├── public/
-├── webflow.json
 ├── package.json
-└── .env.example
+├── tsconfig.json
+├── vite.config.ts
+├── webflow.json
+├── .gitignore
+└── src/
+    ├── index.tsx
+    ├── App.tsx
+    └── styles.css
 ```
 
+**Current Examples** (all implemented):
+1. **basic-extension** - Simple Designer API starter
+2. **element-editor** - Edit element properties and styles
+3. **component-library** - Manage reusable components
+4. **design-tokens** - Create design system tokens
+5. **asset-uploader** - Upload and organize assets
+6. **seo-automator** - Automate SEO metadata
+7. **code-injector** - Inject custom HTML/CSS/JS
+8. **event-driven-app** - Real-time event monitoring
+
 **Time Estimate**: 6-12 hours
+
+**Submitting New Examples**:
+1. Choose a feature or use case not yet covered
+2. Create a new folder in `examples/`
+3. Follow the structure from existing examples
+4. Include full build configuration (package.json, vite.config.ts, tsconfig.json)
+5. Write comprehensive README with code snippets
+6. Test all functionality
+7. Submit PR with clear description
 
 ---
 
